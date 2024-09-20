@@ -1,0 +1,54 @@
+<div class="plugin-skuimages-block">
+    <button type="button" class="button green" id="plugin-skuimages-select-sku-btn" data-product-id="{$plugin_skuimages_product_id}">Выбрать SKU</button>
+</div>
+
+<div id="plugin-skuimages-attached-skus">
+    <h3>Привязанные SKU</h3>
+    <div id="plugin-skuimages-sku-list">
+        {foreach $attached_skus as $sku_id => $images}
+
+            <div class="plugin-skuimages-sku-item" data-sku-id="{$sku_id}">
+                <span>SKU: {$sku_id}</span>
+                {foreach $images as $image}
+                    <img src="{$image.url}" alt="SKU Image" class="plugin-skuimages-sku-image{if $favorite_images[$sku_id]['image_id'] == $image.image_id} selected{/if}" data-image-id='{$image.image_id}'>
+                {/foreach}
+                <button type="button" class="plugin-skuimages-selectfavorite" data-sku-id="{$sku_id}">Избранное</button>
+                <button type="button" class="plugin-skuimages-remove-sku-btn" data-sku-id="{$sku_id}">Удалить</button>
+                
+            </div>
+        {/foreach}
+    </div>
+</div>
+
+<div id="plugin-skuimages-sku-modal" class="plugin-skuimages-modal" style="display: none;">
+    <div class="plugin-skuimages-modal-content">
+        <h3>Выберите характеристики для SKU</h3>
+        <div id="plugin-skuimages-selected-images">
+            <!-- Список выбранных изображений будет добавляться сюда -->
+        </div>
+        <div id="plugin-skuimages-features">
+            {foreach $plugin_skuimages_features as $feature}
+                {if $feature.selectable && $feature.selected > 0}
+                    <div class="plugin-skuimages-feature">
+                        <label>{$feature.name}</label>
+                        <div class="plugin-skuimages-feature-values" data-feature-id="{$feature.id}">
+                            {foreach $feature.values as $value_id => $value}
+                                {if $value.selected}
+                                    <button type="button" class="plugin-skuimages-feature-value-btn" data-value-id="{$value_id}">{$value.value}</button>
+                                {/if}
+                            {/foreach}
+                        </div>
+                    </div>
+                {/if}
+            {/foreach}
+        </div>
+        <button type="button" class="button green plugin-skuimages-save-sku-btn">Сохранить</button>
+    </div>
+</div>
+
+<script src="{$plugin_skuimages_plugin_url}/js/skuimages.js"></script>
+<link rel="stylesheet" type="text/css" href="{$plugin_skuimages_plugin_url}/css/skuimages.css?v12{time()}">
+
+<script>
+    window.pluginSkuimagesSkuFeatureValues = {json_encode($plugin_skuimages_sku_feature_values)};
+</script>
