@@ -16,7 +16,7 @@ class shopSkuimagesPluginBackendSaveController extends waJsonController
             return;
         }
 
-        $model = new shopSkuimagesModel();
+        $model = new shopSkuimagesImagesModel();
 
         foreach ($images as $image_id) {
             foreach ($skus as $sku_id) {

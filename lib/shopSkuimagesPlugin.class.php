@@ -2,13 +2,22 @@
 
 class shopSkuimagesPlugin extends shopPlugin
 {
+
+    protected $modelImages;
+    protected $modelFavorites;
+
+    public function __construct()
+    {
+        $this->modelImages = new shopSkuimagesImagesModel();
+        $this->modelFavorites = new shopSkuimagesFavoritesModel();
+    }
+
     public function backendProductEdit($product)
     {
         $product_id = $product['id'];
-        $model = new shopSkuimagesModel();
-        $skus = $model->getSkusByProductId($product_id);
-        $attached_skus = $model->getImagesByProductId($product_id);
-        $favorite_images_arr = $model->getFavoriteImagesByProductId($product_id);
+        $skus = $this->modelImages->getSkusByProductId($product_id);
+        $attached_skus = $this->modelImages->getImagesByProductId($product_id);
+        $favorite_images_arr = $this->modelFavorites->getFavoriteImagesByProductId($product_id);
         
         $favorite_images = [];
         foreach ($favorite_images_arr as $image) {
@@ -60,26 +69,20 @@ class shopSkuimagesPlugin extends shopPlugin
         return $skuFeatureValues;
     }
 
-    public static function getFavoriteImages($product_id) {
-        $model = new shopSkuimagesModel();
-        return $model->getFavoriteImagesByProductId($product_id);
+    public function getFavoriteImages($product_id) {
+        return $this->modelFavorites->getFavoriteImagesByProductId($product_id);
     }
-    public static function getProductSkuImages($product_id)
+    public function getProductSkuImages($product_id)
     {
-        $sku_images_model = new shopSkuimagesModel();
         $product_skus_model = new shopProductSkusModel();
-
-        // Получаем все артикулы продукта
+        
         $skus = $product_skus_model->getByField('product_id', $product_id, true);
-
-        // Массив для хранения SKU с изображениями
+        
         $sku_images = array();
-
-        // Проходимся по каждому SKU и проверяем наличие изображений
+        
         foreach ($skus as $sku) {
-            $images = $sku_images_model->getImagesBySkuId($sku['id']);
-
-            // Добавляем SKU в массив, только если у него есть изображения
+            $images = $this->modelImages->getImagesBySkuId($sku['id']);
+            
             if (!empty($images)) {
                 $sku_images[$sku['id']] = $images;
             }

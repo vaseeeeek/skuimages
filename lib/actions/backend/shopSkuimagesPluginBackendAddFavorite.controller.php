@@ -8,7 +8,7 @@ class shopSkuimagesPluginBackendAddFavoriteController extends waJsonController
         $product_id = waRequest::post('product_id', null, waRequest::TYPE_INT);
         $selected = waRequest::post('selected', null);
         if ($sku_id && $product_id && $selected) {
-            $model = new shopSkuimagesModel();
+            $model = new shopSkuimagesFavoritesModel();
             $model->addFavorite($product_id, $sku_id, $selected);
             $this->response = array('status' => 'ok');
         } else {
