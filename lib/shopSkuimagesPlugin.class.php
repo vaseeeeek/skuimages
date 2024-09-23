@@ -2,27 +2,29 @@
 
 class shopSkuimagesPlugin extends shopPlugin
 {
-
-    protected $modelImages;
-    protected $modelFavorites;
-
-    public function __construct()
+    public function __construct($info)
     {
-        $this->modelImages = new shopSkuimagesImagesModel();
-        $this->modelFavorites = new shopSkuimagesFavoritesModel();
+        parent::__construct($info);
     }
 
     public function backendProductEdit($product)
     {
         $product_id = $product['id'];
-        $skus = $this->modelImages->getSkusByProductId($product_id);
-        $attached_skus = $this->modelImages->getImagesByProductId($product_id);
-        $favorite_images_arr = $this->modelFavorites->getFavoriteImagesByProductId($product_id);
-        
+
+        // Получаем SKU и изображения, отсортированные по позиции
+        $modelImages = new shopSkuimagesImagesModel();
+        $skus = $modelImages->getSkusByProductId($product_id);
+        $attached_skus = $modelImages->getImagesByProductId($product_id); // Сортировка по позиции
+
+        // Получаем избранные изображения
+        $modelFavorites = new shopSkuimagesFavoritesModel();
+        $favorite_images_arr = $modelFavorites->getFavoriteImagesByProductId($product_id);
+
         $favorite_images = [];
         foreach ($favorite_images_arr as $image) {
             $favorite_images[$image['sku_id']] = $image;
         }
+
         $features = array_filter($product['features_selectable'], function ($feature) {
             return $feature['selected'] > 0;
         });
@@ -33,8 +35,10 @@ class shopSkuimagesPlugin extends shopPlugin
             });
         }
 
-        $skuFeatureValues = $this->getSkuFeatureValues($product_id);
+        // Получаем значения характеристик SKU
+        $skuFeatureValues = self::getSkuFeatureValues($product_id);
 
+        // Передаем данные в шаблон
         $view = wa()->getView();
         $view->assign('plugin_skuimages_skus', $skus);
         $view->assign('plugin_skuimages_features', $features);
@@ -43,19 +47,20 @@ class shopSkuimagesPlugin extends shopPlugin
         $view->assign('plugin_skuimages_sku_feature_values', $skuFeatureValues);
         $view->assign('attached_skus', $attached_skus); // Передаем привязанные SKU
         $view->assign('favorite_images', $favorite_images);
+
         // Передаем URL плагина в шаблон
         $plugin_url = wa()->getAppStaticUrl('shop') . "plugins/skuimages";
         $view->assign('plugin_skuimages_plugin_url', $plugin_url);
 
-        $content = $view->fetch($this->path . '/templates/actions/backend/ProductSkuImages.html');
+        // Генерируем контент
+        $content = $view->fetch(wa()->getAppPath() . '/plugins/skuimages/templates/actions/backend/ProductSkuImages.html');
 
         return array(
             'images' => $content,
         );
     }
 
-
-    private function getSkuFeatureValues($product_id)
+    private static function getSkuFeatureValues($product_id)
     {
         $model = new shopProductFeaturesModel();
         $data = $model->getByField('product_id', $product_id, true);
@@ -69,20 +74,25 @@ class shopSkuimagesPlugin extends shopPlugin
         return $skuFeatureValues;
     }
 
-    public function getFavoriteImages($product_id) {
-        return $this->modelFavorites->getFavoriteImagesByProductId($product_id);
+    public static function getFavoriteImages($product_id)
+    {
+        $modelFavorites = new shopSkuimagesFavoritesModel();
+        return $modelFavorites->getFavoriteImagesByProductId($product_id);
     }
-    public function getProductSkuImages($product_id)
+
+    public static function getProductSkuImages($product_id)
     {
         $product_skus_model = new shopProductSkusModel();
-        
+
         $skus = $product_skus_model->getByField('product_id', $product_id, true);
-        
+
+        $modelImages = new shopSkuimagesImagesModel();
+
         $sku_images = array();
-        
+
         foreach ($skus as $sku) {
-            $images = $this->modelImages->getImagesBySkuId($sku['id']);
-            
+            $images = $modelImages->getImagesBySkuId($sku['id']);
+
             if (!empty($images)) {
                 $sku_images[$sku['id']] = $images;
             }
@@ -90,5 +100,4 @@ class shopSkuimagesPlugin extends shopPlugin
 
         return $sku_images;
     }
-
 }

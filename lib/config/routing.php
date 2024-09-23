@@ -1,4 +1,4 @@
 <?php
 return array (
-  'skuimages/*' => 'frontend/',
+  'skuimages/' => 'frontend/',
 );

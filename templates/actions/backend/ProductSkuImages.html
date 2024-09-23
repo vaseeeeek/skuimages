@@ -1,3 +1,4 @@
+<script src="{$plugin_skuimages_plugin_url}/js/Sortable.min.js"></script>
 <div class="plugin-skuimages-block">
     <button type="button" class="button green" id="plugin-skuimages-select-sku-btn" data-product-id="{$plugin_skuimages_product_id}">Выбрать SKU</button>
 </div>
@@ -6,15 +7,19 @@
     <h3>Привязанные SKU</h3>
     <div id="plugin-skuimages-sku-list">
         {foreach $attached_skus as $sku_id => $images}
-
             <div class="plugin-skuimages-sku-item" data-sku-id="{$sku_id}">
                 <span>SKU: {$sku_id}</span>
+
                 {foreach $images as $image}
-                    <img src="{$image.url}" alt="SKU Image" class="plugin-skuimages-sku-image{if $favorite_images[$sku_id]['image_id'] == $image.image_id} selected{/if}" data-image-id='{$image.image_id}'>
+                    <img 
+                        src="{$image.url}" 
+                        alt="SKU Image" 
+                        class="plugin-skuimages-sku-image{if isset($favorite_images[$sku_id]) && $favorite_images[$sku_id]['image_id'] == $image.image_id} selected{/if}" 
+                        data-image-id='{$image.image_id}'>
                 {/foreach}
+
                 <button type="button" class="plugin-skuimages-selectfavorite" data-sku-id="{$sku_id}">Избранное</button>
                 <button type="button" class="plugin-skuimages-remove-sku-btn" data-sku-id="{$sku_id}">Удалить</button>
-                
             </div>
         {/foreach}
     </div>

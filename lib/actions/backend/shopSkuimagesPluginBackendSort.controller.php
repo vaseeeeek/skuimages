@@ -1,31 +1,30 @@
 <?php
 
-class shopSkuimagesPluginSortController extends waJsonController
+class shopSkuimagesPluginBackendSortController extends waJsonController
 {
-    /**
-     * Основной метод контроллера для обработки сортировки изображений
-     */
     public function execute()
     {
         try {
-            // Получаем данные из POST-запроса
-            $positions = waRequest::post('positions', array(), waRequest::TYPE_ARRAY);
+            // Получаем данные через GET-запрос (без csrf)
+            $positions_raw = waRequest::get('positions', '');
+            $sku_id = waRequest::get('sku_id', null, waRequest::TYPE_INT);
+            $product_id = waRequest::get('product_id', null, waRequest::TYPE_INT);
 
-            // Валидация данных
+            // Декодируем JSON-строку в массив
+            $positions = json_decode($positions_raw, true);
+
+            // Логирование позиций для проверки
+            waLog::dump($positions, 'positions.log');
+
             if (empty($positions) || !$this->validatePositions($positions)) {
                 throw new waException('Неверные данные для сортировки изображений.', 400);
             }
 
-            // Получаем модель изображений
             $modelImages = new shopSkuimagesImagesModel();
+            $modelImages->updateImagePositions($positions, $sku_id, $product_id);
 
-            // Обновляем позиции изображений
-            $modelImages->updateImagePositions($positions);
-
-            // Возвращаем успешный результат
             $this->response = array('status' => 'success', 'message' => 'Позиции изображений успешно обновлены.');
         } catch (Exception $e) {
-            // Обрабатываем ошибки
             $this->setError($e->getMessage());
         }
     }
@@ -46,3 +45,4 @@ class shopSkuimagesPluginSortController extends waJsonController
         return true;
     }
 }
+

@@ -6,7 +6,7 @@ class shopSkuimagesImagesModel extends waModel
 
     public function getImagesByProductId($product_id)
     {
-        $sql = "SELECT * FROM {$this->table} WHERE product_id = i:product_id";
+        $sql = "SELECT * FROM {$this->table} WHERE product_id = i:product_id ORDER BY position ASC";
         $result = $this->query($sql, array('product_id' => $product_id))->fetchAll();
         $images = [];
         foreach ($result as $row) {
@@ -45,10 +45,13 @@ class shopSkuimagesImagesModel extends waModel
                 ON DUPLICATE KEY UPDATE sku_id = :sku_id, image_id = :image_id";
         return $this->query($sql, $data);
     }
-    
+
     public function getImagesBySkuId($sku_id)
     {
-        return $this->select('*')->where('sku_id = ?', $sku_id)->fetchAll();
+        return $this->select('*')
+            ->where('sku_id = ?', $sku_id)
+            ->order('position ASC')
+            ->fetchAll();
     }
 
     /**
@@ -61,22 +64,51 @@ class shopSkuimagesImagesModel extends waModel
     {
         // Получаем изображения с сортировкой по полю position
         return $this->select('*')
-                    ->where('product_id = ?', $product_id)
-                    ->order('position ASC')
-                    ->fetchAll();
+            ->where('product_id = ?', $product_id)
+            ->order('position ASC')
+            ->fetchAll();
     }
 
     /**
      * Массовое обновление позиций изображений
      *
      * @param array $positions Массив данных, где ключ — ID изображения, значение — новая позиция
+     * @param int $sku_id ID артикулов (SKU)
+     * @param int $product_id ID товара (product)
      * @return bool
      */
-    public function updateImagePositions(array $positions)
+    public function updateImagePositions(array $positions, $sku_id, $product_id)
     {
+        waLog::dump($positions, 'updateImagePositions.log');
+        waLog::dump($sku_id, 'updateImagePositions.log');
+        waLog::dump($product_id, 'updateImagePositions.log');
+
         foreach ($positions as $image_id => $position) {
-            $this->updateByField('image_id', $image_id, ['position' => $position]);
+            // Проверяем, существует ли запись для данного SKU и товара
+            $record = $this->getByField(array(
+                'image_id' => $image_id,
+                'sku_id' => $sku_id,
+                'product_id' => $product_id
+            ));
+
+            if ($record) {
+                // Если запись найдена, обновляем позицию
+                $this->updateByField(
+                    array(
+                        'image_id' => $image_id,
+                        'sku_id' => $sku_id,
+                        'product_id' => $product_id
+                    ),
+                    array('position' => $position)
+                );
+                waLog::dump("Запись обновлена: image_id: $image_id, position: $position", 'updateImagePositions.log');
+            } else {
+                // Если запись не найдена, логируем это
+                waLog::dump("Запись не найдена: image_id: $image_id, sku_id: $sku_id, product_id: $product_id", 'updateImagePositions.log');
+            }
         }
         return true;
     }
+
+
 }
