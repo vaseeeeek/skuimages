@@ -8,7 +8,7 @@ class shopSkuimagesPluginBackendRemoveController extends waJsonController
         $product_id = waRequest::post('product_id', null, waRequest::TYPE_INT);
 
         if ($sku_id && $product_id) {
-            $model = new shopSkuimagesModel();
+            $model = new shopSkuimagesImagesModel();
             $model->removeImagesBySkuId($product_id, $sku_id);
             $this->response = array('status' => 'ok');
         } else {
