@@ -13,15 +13,29 @@ class shopSkuimagesFavoritesModel extends waModel
      */
     public function addFavorite($product_id, $sku_id, $selected)
     {
-        // Данные для вставки
+        // Данные для вставки или обновления
         $data = array(
             'product_id' => $product_id,
             'sku_id' => $sku_id,
             'image_id' => $selected,
         );
-
-        // Вставляем или обновляем запись
-        return $this->insert($data, 2); // Используем режим REPLACE (ON DUPLICATE KEY UPDATE)
+    
+        // Проверяем, существует ли запись с такими product_id и sku_id
+        $existing = $this->getByField(array(
+            'product_id' => $product_id,
+            'sku_id' => $sku_id,
+        ));
+    
+        if ($existing) {
+            // Если запись существует, обновляем image_id
+            return $this->updateByField(array(
+                'product_id' => $product_id,
+                'sku_id' => $sku_id,
+            ), array('image_id' => $selected));
+        } else {
+            // Если записи нет, вставляем новую
+            return $this->insert($data);
+        }
     }
 
     /**

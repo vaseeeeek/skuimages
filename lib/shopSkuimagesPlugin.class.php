@@ -45,7 +45,7 @@ class shopSkuimagesPlugin extends shopPlugin
         $view->assign('plugin_skuimages_product_id', $product_id);
         $view->assign('plugin_skuimages_product_features', $features);
         $view->assign('plugin_skuimages_sku_feature_values', $skuFeatureValues);
-        $view->assign('attached_skus', $attached_skus); // Передаем привязанные SKU
+        $view->assign('attached_skus', $attached_skus); 
         $view->assign('favorite_images', $favorite_images);
 
         // Передаем URL плагина в шаблон

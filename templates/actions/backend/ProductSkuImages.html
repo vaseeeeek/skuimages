@@ -1,3 +1,19 @@
+{$waProductSkus = $wa->shop->skus($product.id)}
+{$waProductSkus = $waProductSkus|@reset}
+
+{$skuNames = []}
+{foreach from=$attached_skus item=sku key=sku_id}
+    {foreach from=$waProductSkus item=productSku key=key}
+        {if $productSku['id'] == $sku_id}
+            {$skuNames[$sku_id] = $productSku['name']}    
+            {break}
+        {/if}
+    {/foreach}
+{/foreach}
+<script>
+    console.log({json_encode($skuNames)});
+</script>
+
 <script src="{$plugin_skuimages_plugin_url}/js/Sortable.min.js"></script>
 <div class="plugin-skuimages-block">
     <button type="button" class="button green" id="plugin-skuimages-select-sku-btn" data-product-id="{$plugin_skuimages_product_id}">Выбрать SKU</button>
@@ -7,9 +23,17 @@
     <h3>Привязанные SKU</h3>
     <div id="plugin-skuimages-sku-list">
         {foreach $attached_skus as $sku_id => $images}
+            {$skuName = $sku_id}
+            <script>
+                console.log({json_encode($skuNames)});
+                console.log({json_encode($skuNames[$sku_id])});
+                console.log({json_encode(isset($skuNames[$sku_id]))});
+            </script>
+            {if isset($skuNames[$sku_id])}
+                {$skuName = $skuNames[$sku_id]}
+            {/if}
             <div class="plugin-skuimages-sku-item" data-sku-id="{$sku_id}">
-                <span>SKU: {$sku_id}</span>
-
+                <span>SKU: {$skuName}</span>
                 {foreach $images as $image}
                     <img 
                         src="{$image.url}" 
@@ -18,7 +42,7 @@
                         data-image-id='{$image.image_id}'>
                 {/foreach}
 
-                <button type="button" class="plugin-skuimages-selectfavorite" data-sku-id="{$sku_id}">Избранное</button>
+                <button type="button" class="plugin-skuimages-selectfavorite" data-sku-id="{$sku_id}" style="display: none;">Избранное</button>
                 <button type="button" class="plugin-skuimages-remove-sku-btn" data-sku-id="{$sku_id}">Удалить</button>
             </div>
         {/foreach}

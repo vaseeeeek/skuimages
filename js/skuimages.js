@@ -241,25 +241,29 @@ $(document).ready(function () {
             }
         }, 'json');
     });
-    $(document).on('click', '.plugin-skuimages-sku-image', function(){
+
+    $(document).on('click', '.plugin-skuimages-sku-image', function() {
+        // Убираем класс "selected" у всех изображений в блоке и добавляем его только выбранному
         $(this).parent().find('.plugin-skuimages-sku-image').removeClass('selected');
         $(this).addClass('selected');
-    });
-    $(document).on('click', '.plugin-skuimages-selectfavorite', function(){
-        let skuId = $(this).data('sku-id');
-        let productId = $('#plugin-skuimages-select-sku-btn').data('product-id');
-        let $button = $(this);
-        let selected = $(this).parent().find('.plugin-skuimages-sku-image.selected').data('image-id');
-        $.post('?plugin=skuimages&action=AddFavorite', {
+    
+        // Получаем нужные данные для отправки
+        let skuId = $(this).closest('.plugin-skuimages-sku-item').data('sku-id'); // Ищем ближайший блок SKU
+        let productId = $('#plugin-skuimages-select-sku-btn').data('product-id'); // Получаем ID продукта
+        let selected = $(this).data('image-id'); // Получаем ID выбранного изображения
+    
+        // Выполняем AJAX-запрос для отправки данных
+        $.post('?plugin=skuimages&action=addfavorite', {
             sku_id: skuId,
             product_id: productId,
             selected: selected
-        }, function (response) {
+        }, function(response) {
             console.log(response);
             if (response.status == 'ok') {
+                // Показываем сообщение об успешном выборе
                 function showSuccessMessage() {
                     const messageDiv = document.createElement('div');
-                    messageDiv.textContent = 'Успешно';
+                    messageDiv.textContent = 'Изображение выбрано как избранное';
                     messageDiv.className = 'success-message';
                     document.body.appendChild(messageDiv);
                     setTimeout(() => {
@@ -268,8 +272,8 @@ $(document).ready(function () {
                 }
                 showSuccessMessage();
             }
-        }, 'json'); 
-    });
+        }, 'json');
+    });    
 });
 $(document).ready(function () {
     // Отключаем стандартное поведение для перетаскивания везде на форме
